@@ -156,6 +156,11 @@ This can also be configured using the `pyproject.toml` file:
 dialect = "clickhouse"
 ```
 
+The file cache is keyed by the effective formatting configuration, so changing
+formatting settings triggers a fresh run. Reporting options such
+as `--check` and `--verbose` reuse the same cache. `--reset-cache` clears all cached
+configurations.
+
 Note that with this option, sqlfmt will not lowercase **most** non-reserved keywords, even common ones like `sum` or `count`. See (and please join) [this discussion](https://github.com/tconbeer/sqlfmt/discussions/229) for more on this topic.
 
 ### Integrations

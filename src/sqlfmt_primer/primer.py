@@ -10,7 +10,7 @@ from git.repo import Repo
 from platformdirs import user_cache_dir
 
 from sqlfmt.api import get_matching_paths, initialize_progress_bar, run
-from sqlfmt.cache import get_cache_file
+from sqlfmt.cache import clear_cache
 from sqlfmt.mode import Mode
 
 
@@ -245,11 +245,7 @@ def clear_sqlfmt_cache() -> None:
     Deletes the cache file from the disk, if it exists. Called before
     each primer run to ensure we're formatting every file every time.
     """
-    p = get_cache_file()
-    try:
-        p.unlink()
-    except FileNotFoundError:
-        pass
+    clear_cache()
 
 
 def _warn(msg: str) -> None:

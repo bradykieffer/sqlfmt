@@ -1,7 +1,9 @@
+import hashlib
+import json
 import pickle
 from importlib import metadata
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, Iterable, List, Optional, Tuple
 
 from platformdirs import user_cache_dir
 
@@ -11,22 +13,31 @@ from sqlfmt.report import STDIN_PATH, SqlFormatResult
 Cache = Dict[Path, Tuple[float, int]]
 
 
-def get_cache_file() -> Path:
+def get_cache_file(mode: Optional[Mode] = None) -> Path:
     """
     Returns the path to the cache file on disk
     """
     sqlfmt_version = metadata.version("shandy-sqlfmt")
     cache_dir = Path(user_cache_dir(appname="sqlfmt"))
-    cache_file = cache_dir / f"cache-{sqlfmt_version}.pickle"
+    mode = mode or Mode()
+    formatting_config = (
+        mode.dialect_name.lower(),
+        mode.line_length,
+        mode.no_jinjafmt,
+        mode.encoding,
+        mode.fast,
+    )
+    digest = hashlib.sha256(json.dumps(formatting_config).encode()).hexdigest()
+    cache_file = cache_dir / f"cache-{sqlfmt_version}-{digest}.pickle"
     return cache_file
 
 
-def load_cache() -> Cache:
+def load_cache(mode: Optional[Mode] = None) -> Cache:
     """
     Returns a Cache (a dictionary keyed by file path) by loading
     from a pickle saved to disk
     """
-    cache_file = get_cache_file()
+    cache_file = get_cache_file(mode)
     try:
         with cache_file.open("rb") as f:
             cache: Cache = pickle.load(f)
@@ -60,7 +71,7 @@ def write_cache(cache: Cache, results: List[SqlFormatResult], mode: Mode) -> Non
     """
     Updates cache with results, then dumps cache to disk
     """
-    cache_file = get_cache_file()
+    cache_file = get_cache_file(mode)
     cache_file.parent.mkdir(parents=True, exist_ok=True)
     new_cache = cache.copy()
     for path in _gen_cache_keys_for_updates(results, mode):
@@ -72,13 +83,13 @@ def write_cache(cache: Cache, results: List[SqlFormatResult], mode: Mode) -> Non
 
 def clear_cache() -> None:
     """
-    Deletes the cache file on disk, if it exists
+    Deletes all sqlfmt cache files on disk, if they exist.
     """
-    p = get_cache_file()
-    try:
-        p.unlink()
-    except FileNotFoundError:
-        pass
+    for p in get_cache_file().parent.glob("cache-*.pickle"):
+        try:
+            p.unlink()
+        except FileNotFoundError:
+            pass
 
 
 def _get_cache_info(path: Path) -> Tuple[float, int]:

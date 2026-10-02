@@ -98,14 +98,15 @@ def test_preformatted_short_lines_env(
     print(results.stderr)
     assert "5 files formatted" in results.stderr
 
-    # test that CLI flag overrides ENV VAR
+    # agent-check: multiple-asserts -- validate env config and CLI precedence
+    # The line-length change must invalidate the cache from the previous run.
     args = f"{preformatted_dir.as_posix()} -l 88 --check"
     results = sqlfmt_runner.invoke(
         sqlfmt_main, args=args, env={"SQLFMT_LINE_LENGTH": "1"}
     )
-    assert results.exit_code == 0
+    assert results.exit_code == 1
     print(results.stderr)
-    assert "6 files passed formatting check" in results.stderr
+    assert "5 files failed formatting check" in results.stderr
 
 
 def test_unformatted_check(sqlfmt_runner: CliRunner, unformatted_dir: Path) -> None:
