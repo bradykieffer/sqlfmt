@@ -156,8 +156,23 @@ This can also be configured using the `pyproject.toml` file:
 dialect = "clickhouse"
 ```
 
+For mixed-dialect projects, use an ordered regex-to-dialect table:
+
+```toml
+[tool.sqlfmt]
+dialect = "polyglot"
+
+[tool.sqlfmt.dialect_patterns]
+'_clickhouse\.sql$' = "clickhouse"
+```
+
+Patterns use Python regex syntax and search the filename (including its extension),
+not the directory path. The first matching pattern wins. Unmatched files and stdin
+use the default dialect. An explicit `--dialect` or `SQLFMT_DIALECT` overrides all
+patterns. Invalid regexes and unsupported dialect names are rejected before formatting.
+
 The file cache is keyed by the effective formatting configuration, so changing
-formatting settings triggers a fresh run. Reporting options such
+formatting settings or dialect rules triggers a fresh run. Reporting options such
 as `--check` and `--verbose` reuse the same cache. `--reset-cache` clears all cached
 configurations.
 

@@ -198,6 +198,8 @@ def sqlfmt(
             if ctx.get_parameter_source(k).name != "DEFAULT"  # type: ignore
         }
         config.update(non_default_options)
+        if "dialect_name" in non_default_options:
+            config["dialect_patterns"] = {}
         mode = Mode(**config)  # type: ignore
 
         matched_files = api.get_matching_paths(files, mode=mode)

@@ -234,6 +234,7 @@ def _format_one(path: Path, mode: Mode) -> SqlFormatResult:
     Runs format_string on the contents of a single file (found at path). Handles
     potential user errors in formatted code, and returns a SqlfmtResult
     """
+    mode = mode.for_path(path)
     source, encoding, utf_bom = _read_path_or_stdin(path, mode)
     try:
         formatted = format_string(source, mode)

@@ -12,7 +12,7 @@ else:
     import tomli as tomllib
 
 
-Config = Dict[str, Union[bool, int, List[str], str, Path]]
+Config = Dict[str, Union[bool, int, List[str], str, Path, Dict[str, str]]]
 
 
 def load_config_file(files: List[Path], config_path: Optional[Path]) -> Config:

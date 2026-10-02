@@ -14,10 +14,18 @@ from sqlfmt.mode import Mode
         {"no_jinjafmt": True},
         {"encoding": "utf-16"},
         {"fast": True},
+        {"dialect_patterns": {"clickhouse": "clickhouse"}},
     ],
 )
 def test_formatting_config_changes_cache(changes: dict) -> None:
     assert get_cache_file(Mode(**changes)) != get_cache_file(Mode())
+
+
+def test_pattern_order_changes_cache() -> None:
+    patterns = {".*": "polyglot", "clickhouse": "clickhouse"}
+    assert get_cache_file(Mode(dialect_patterns=patterns)) != get_cache_file(
+        Mode(dialect_patterns=dict(reversed(list(patterns.items()))))
+    )
 
 
 def test_reporting_config_preserves_cache() -> None:

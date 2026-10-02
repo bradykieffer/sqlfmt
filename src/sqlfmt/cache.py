@@ -22,6 +22,7 @@ def get_cache_file(mode: Optional[Mode] = None) -> Path:
     mode = mode or Mode()
     formatting_config = (
         mode.dialect_name.lower(),
+        list(mode.dialect_patterns.items()),
         mode.line_length,
         mode.no_jinjafmt,
         mode.encoding,
